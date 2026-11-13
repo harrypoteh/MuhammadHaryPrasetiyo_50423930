@@ -1,5 +1,6 @@
 package com.mycompany.mskproduction.ui;
 
+import com.mycompany.mskproduction.config.DatabaseConfig;
 import com.mycompany.mskproduction.dao.UserDAO;
 import com.mycompany.mskproduction.model.Session;
 import com.mycompany.mskproduction.model.User;
@@ -9,8 +10,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Window;
-import java.sql.SQLException;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -28,7 +27,7 @@ import javax.swing.border.EmptyBorder;
  */
 public class LoginDialog extends JDialog {
 
-    private final UserDAO userDAO = new UserDAO();
+    private final UserDAO userDAO = new UserDAO(DatabaseConfig.getJdbcTemplate());
     private final JTextField usernameField = Ui.textField(18);
     private final JPasswordField passwordField = new JPasswordField(18);
 
@@ -127,28 +126,33 @@ public class LoginDialog extends JDialog {
             Ui.showError(this, "Username dan password wajib diisi.");
             return;
         }
+
+        User user;
         try {
-            User user = userDAO.authenticate(username, password);
-            if (user == null) {
-                Ui.showError(this, "Username atau password salah.");
-                passwordField.selectAll();
-                passwordField.requestFocusInWindow();
-                return;
-            }
-            Session.setUser(user);
-            dispose();
-            Window[] windows = Window.getWindows();
-            for (Window window : windows) {
-                if (window instanceof HomeFrame) {
-                    window.dispose();
-                    break;
-                }
-            }
-            new LoginSuccessFrame().setVisible(true);
-        } catch (SQLException ex) {
+            user = userDAO.authenticate(username, password);
+        } catch (Exception ex) {
             Ui.showError(this, "Tidak dapat terhubung ke database.\n\n" + ex.getMessage()
                     + "\n\nPeriksa server MySQL atau atur koneksi melalui tombol "
                     + "\"Pengaturan Database\" di halaman utama.");
+            return;
         }
+
+        if (user == null) {
+            Ui.showError(this, "Username atau password salah.");
+            passwordField.selectAll();
+            passwordField.requestFocusInWindow();
+            return;
+        }
+
+        Session.setUser(user);
+        dispose();
+        Window[] windows = Window.getWindows();
+        for (Window window : windows) {
+            if (window instanceof HomeFrame) {
+                window.dispose();
+                break;
+            }
+        }
+        new LoginSuccessFrame().setVisible(true);
     }
 }
