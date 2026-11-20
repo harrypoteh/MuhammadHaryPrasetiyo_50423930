@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Desain laporan MSK Production (Praktikum 6 - JasperReports).
+
+    Laporan ini terhubung langsung ke database aplikasi: query di bawah
+    dijalankan memakai koneksi dari kelas Database, sehingga isi laporan
+    selalu mengikuti data tabel users yang sedang aktif.
+-->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="mskreport" language="java" pageWidth="595" pageHeight="842"
+              columnWidth="555" leftMargin="20" rightMargin="20"
+              topMargin="20" bottomMargin="20"
+              uuid="43702751-4949-4893-b1f7-23598f4c55af">
+
+	<!-- ============================================================
+	     Parameter yang dikirim dari program Java
+	     ============================================================ -->
+	<parameter name="dicetak_oleh" class="java.lang.String">
+		<defaultValueExpression><![CDATA["Administrator"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tanggal_cetak" class="java.util.Date">
+		<defaultValueExpression><![CDATA[new java.util.Date()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nama_database" class="java.lang.String">
+		<defaultValueExpression><![CDATA["msk_production_login"]]></defaultValueExpression>
+	</parameter>
+
+	<!-- ============================================================
+	     Query: sumber data laporan (dijalankan lewat koneksi JDBC)
+	     ============================================================ -->
+	<queryString language="SQL">
+		<![CDATA[SELECT id, username, nama, role FROM users ORDER BY id]]>
+	</queryString>
+
+	<field name="id" class="java.lang.Integer"/>
+	<field name="username" class="java.lang.String"/>
+	<field name="nama" class="java.lang.String"/>
+	<field name="role" class="java.lang.String"/>
+
+	<!-- Variabel agregat: menghitung jumlah baris data akun -->
+	<variable name="jumlah_akun" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{id}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+
+	<!-- ============================================================
+	     JUDUL LAPORAN
+	     ============================================================ -->
+	<title>
+		<band height="104" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="30" uuid="a1000000-0000-0000-0000-000000000001"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MSK PRODUCTION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="30" width="555" height="18" uuid="a1000000-0000-0000-0000-000000000002"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Sistem Produksi Roti]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="56" width="555" height="22" uuid="a1000000-0000-0000-0000-000000000003"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[LAPORAN DAFTAR AKUN ADMINISTRATOR]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="86" width="555" height="1" uuid="a1000000-0000-0000-0000-000000000004"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+		</band>
+	</title>
+
+	<!-- ============================================================
+	     HEADER HALAMAN: info pencetakan
+	     ============================================================ -->
+	<pageHeader>
+		<band height="26" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="2" width="60" height="16" uuid="a1000000-0000-0000-0000-000000000005"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<text><![CDATA[Dicetak oleh]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="62" y="2" width="160" height="16" uuid="a1000000-0000-0000-0000-000000000006"/>
+				<textElement>
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{dicetak_oleh}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="228" y="2" width="40" height="16" uuid="a1000000-0000-0000-0000-000000000007"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<text><![CDATA[Database]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="270" y="2" width="120" height="16" uuid="a1000000-0000-0000-0000-000000000008"/>
+				<textElement>
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{nama_database}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd MMMM yyyy, HH:mm">
+				<reportElement x="375" y="2" width="180" height="16" uuid="a1000000-0000-0000-0000-000000000009"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tanggal_cetak}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+
+	<!-- ============================================================
+	     HEADER KOLOM TABEL
+	     ============================================================ -->
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="40" height="24" backcolor="#E7E5E4" mode="Opaque" uuid="a1000000-0000-0000-0000-000000000010"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="0" width="140" height="24" backcolor="#E7E5E4" mode="Opaque" uuid="a1000000-0000-0000-0000-000000000011"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Username]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="0" width="200" height="24" backcolor="#E7E5E4" mode="Opaque" uuid="a1000000-0000-0000-0000-000000000012"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nama Lengkap]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="380" y="0" width="175" height="24" backcolor="#E7E5E4" mode="Opaque" uuid="a1000000-0000-0000-0000-000000000013"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hak Akses]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+
+	<!-- ============================================================
+	     DETAIL: diulang untuk setiap baris hasil query
+	     ============================================================ -->
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField pattern="#,##0">
+				<reportElement x="0" y="0" width="40" height="20" uuid="a1000000-0000-0000-0000-000000000014"/>
+				<box leftPadding="4" rightPadding="4">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="40" y="0" width="140" height="20" uuid="a1000000-0000-0000-0000-000000000015"/>
+				<box leftPadding="5" rightPadding="5">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{username}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="180" y="0" width="200" height="20" uuid="a1000000-0000-0000-0000-000000000016"/>
+				<box leftPadding="5" rightPadding="5">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nama}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="380" y="0" width="175" height="20" uuid="a1000000-0000-0000-0000-000000000017"/>
+				<box leftPadding="5" rightPadding="5">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{role}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+
+	<!-- ============================================================
+	     FOOTER KOLOM
+	     ============================================================ -->
+	<columnFooter>
+		<band height="10" splitType="Stretch"/>
+	</columnFooter>
+
+	<!-- ============================================================
+	     FOOTER HALAMAN: nomor halaman
+	     ============================================================ -->
+	<pageFooter>
+		<band height="26" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="555" height="1" uuid="a1000000-0000-0000-0000-000000000020"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="0" y="6" width="300" height="16" uuid="a1000000-0000-0000-0000-000000000021"/>
+				<textElement>
+					<font fontName="SansSerif" size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Dihasilkan otomatis oleh aplikasi MSK Production]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="355" y="6" width="60" height="16" uuid="a1000000-0000-0000-0000-000000000022"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Halaman " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="415" y="6" width="140" height="16" uuid="a1000000-0000-0000-0000-000000000024"/>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" dari " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+
+	<!-- ============================================================
+	     SUMMARY: total data dan catatan penutup
+	     ============================================================ -->
+	<summary>
+		<band height="56" splitType="Stretch">
+			<staticText>
+				<reportElement x="380" y="8" width="130" height="18" uuid="a1000000-0000-0000-0000-000000000018"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Jumlah akun terdaftar]]></text>
+			</staticText>
+			<textField pattern="#,##0">
+				<reportElement x="512" y="8" width="43" height="18" uuid="a1000000-0000-0000-0000-000000000019"/>
+				<box leftPadding="5">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{jumlah_akun}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="34" width="555" height="18" uuid="a1000000-0000-0000-0000-000000000023"/>
+				<textElement>
+					<font fontName="SansSerif" size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Catatan: password akun disimpan dalam bentuk hash SHA-256 sehingga tidak ditampilkan pada laporan ini.]]></text>
+			</staticText>
+		</band>
+	</summary>
+
+</jasperReport>
